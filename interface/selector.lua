@@ -5,6 +5,7 @@ local gui = require("__gui-modules__.gui")
 local function create_button(color)
 	return {
 		type="sprite-button",
+		style = "color_coded_button",
 		tags={color=color},
 		sprite = "item/"..color.."-pipe"
 	}
@@ -22,16 +23,24 @@ gui.new{
 				{type = "label", caption = {"pipe-placer.default"}},
 				{
 					type = "table", name = "default",
-					column_count = 9,
+					column_count = 6, style = "color_coded_pipes_table",
 					children = {
-						{type="sprite-button", sprite="item/pipe"},
-						{type="sprite-button", sprite="item/pipe"},
+						{
+							type="sprite-button",
+							style = "color_coded_button",
+							sprite="item/pipe"
+						},
+						{
+							type="sprite-button",
+							style = "color_coded_button",
+							sprite="item/pipe"
+						},
 					}
 				},
 				{type = "label", caption = {"pipe-placer.colors"}},
 				{
 					type = "table", name = "colors",
-					column_count = 9,
+					column_count = 6, style = "color_coded_pipes_table",
 					children = {
 						create_button("red"),
 						create_button("orange"),
@@ -47,7 +56,7 @@ gui.new{
 				{type = "label", caption = {"pipe-placer.fluids"}},
 				{
 					type = "table", name = "fluids",
-					column_count = 9,
+					column_count = 6, style = "color_coded_pipes_table",
 					children = {}
 				}
 			}
@@ -61,6 +70,7 @@ gui.new{
 		end
 
 		fluid_table.clear()
+		---@type GuiElemModuleDef[]
 		local fluids = {}
 
     for _, fluid in pairs(game.fluid_prototypes) do
@@ -69,6 +79,8 @@ gui.new{
 					table.insert(fluids, create_button(fluid.name))
 			end
 		end
+
+		fluids[1].toggled = true
 
 		state.gui.add("pipe-placer", fluid_table, fluids, true)
 		state.root.visible = true
