@@ -3,6 +3,7 @@ local gui = require("__gui-modules__.gui")
 ---@class WindowState.color_selector : WindowState
 ---@field visible boolean
 ---@field selected LuaGuiElement
+---@field item string?
 
 ---@param color string
 ---@return GuiElemModuleDef
@@ -107,6 +108,7 @@ gui.new{
 			state.selected.toggled = false
 			elem.toggled = true
 			state.selected = elem
+			state.player.cursor_ghost = elem.tags.color.."-"..state.item
 		end
 	} --[[@as table<any, fun(state:WindowState.color_selector,elem:LuaGuiElement,event:GuiEventData)>]]
 } --[[@as newWindowParams]]

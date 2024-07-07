@@ -69,23 +69,64 @@ events[defines.events.on_player_cursor_stack_changed] = function (event)
 	local state = global[script.mod_name][event.player_index]
 	local player = state.player
 	local cursor_stack = player.cursor_stack
+	local cursor_ghost = player.cursor_ghost --[[@as LuaItemPrototype]]
 	local cursor_valid = valid_stack(cursor_stack)
-	if state.visible then
-		if not cursor_valid then
+
+	if not cursor_valid and not cursor_ghost then
+		if state.visible then
+			state.item = nil
 			state.visible = false
 			state.root.visible = false
-			return
 		end
-	elseif not cursor_valid then
 		return
 	end
 
-	local name = cursor_stack.name
+	---@type string
+	local name
+	if not cursor_valid then
+		-- remove color prefix if it exists
+		local ghost_name = cursor_ghost.name
+		if not colorable_entities[ghost_name] then
+			for item in pairs(colorable_entities) do
+				if ghost_name:match(item.."$") then
+					name = item
+				end
+			end
+			if not name then
+				if state.visible then
+					state.item = nil
+					state.visible = false
+					state.root.visible = false
+				end
+				return
+			end
+		else
+			name = ghost_name
+		end
+	else
+		---@cast cursor_stack LuaItemStack
+		name = cursor_stack.name
+	end
+
 	if not colorable_entities[name] then
 		-- Remove window
 		if state.visible then
+			state.item = nil
 			state.visible = false
 			state.root.visible = false
+		end
+		return
+	end
+
+	if state.item == name then return end
+	state.item = name
+
+	local selected = state.selected
+	if selected.name ~= "default_color" then
+		if selected.name == "dynamic_toggle" then
+			-- Choose the proper color somehow?
+		else
+			player.cursor_ghost = selected.tags.color.."-"..name
 		end
 	end
 
