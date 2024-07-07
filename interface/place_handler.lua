@@ -5,6 +5,9 @@ local events = place_handler.events
 local colorable_entities = {
 	["entity-ghost"] = true,
 	["pipe"] = true,
+	["pipe-to-ground"] = true,
+	["pump"] = true,
+	["storage-tank"] = true,
 }
 
 events[defines.events.on_built_entity] = function (event)
