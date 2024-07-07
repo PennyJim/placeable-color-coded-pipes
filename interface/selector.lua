@@ -13,7 +13,7 @@ end
 
 gui.new{
 	window_def = {
-		namespace = "pipe-placer",
+		namespace = script.mod_name,
 		root = "left",
 		version = 1,
 		definition = {
