@@ -58,5 +58,42 @@ events[defines.events.on_built_entity] = function (event)
 	end
 end
 
+---@param stack LuaItemStack?
+---@return boolean valid
+local function valid_stack(stack)
+	return stack and stack.valid and stack.valid_for_read or false
+end
+
+events[defines.events.on_player_cursor_stack_changed] = function (event)
+	---@type WindowState.color_selector
+	local state = global[script.mod_name][event.player_index]
+	local player = state.player
+	local cursor_stack = player.cursor_stack
+	local cursor_valid = valid_stack(cursor_stack)
+	if state.visible then
+		if not cursor_valid then
+			state.visible = false
+			state.root.visible = false
+			return
+		end
+	elseif not cursor_valid then
+		return
+	end
+
+	local name = cursor_stack.name
+	if not colorable_entities[name] then
+		-- Remove window
+		if state.visible then
+			state.visible = false
+			state.root.visible = false
+		end
+	end
+
+	if not state.visible then
+		-- Add window
+		state.visible = true
+		state.root.visible = true
+	end
+end
 
 return place_handler
