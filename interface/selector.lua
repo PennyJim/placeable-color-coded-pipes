@@ -1,5 +1,9 @@
 local gui = require("__gui-modules__.gui")
 
+---@class WindowState.color_selector : WindowState
+---@field visible boolean
+---@field selected LuaGuiElement
+
 ---@param color string
 ---@return GuiElemModuleDef
 local function create_button(color)
@@ -7,7 +11,8 @@ local function create_button(color)
 		type="sprite-button",
 		style = "color_coded_button",
 		tags={color=color},
-		sprite = "item/"..color.."-pipe"
+		sprite = "item/"..color.."-pipe",
+		handler = "selector"
 	}
 end
 
@@ -27,13 +32,17 @@ gui.new{
 					children = {
 						{
 							type="sprite-button",
+							name = "default_color",
 							style = "color_coded_button",
-							sprite="item/pipe"
+							sprite="item/pipe",
+							handler = "selector"
 						},
 						{
 							type="sprite-button",
+							name = "dynamic_toggle",
 							style = "color_coded_button",
-							sprite="item/pipe"
+							sprite="item/pipe",
+							handler = "selector"
 						},
 					}
 				},
@@ -62,6 +71,7 @@ gui.new{
 			}
 		}
 	},
+	---@param state WindowState.color_selector
 	state_setup = function (state)
 		local fluid_table = state.elems.fluids
 		if not fluid_table.valid then
@@ -80,11 +90,25 @@ gui.new{
 			end
 		end
 
-		fluids[1].toggled = true
+		if not state.selected or not state.selected.valid then
+			local default_color = state.elems.default_color
+			default_color.toggled = true
+			state.selected = default_color
+		end
 
-		state.gui.add("pipe-placer", fluid_table, fluids, true)
-		state.root.visible = true
-	end
+		state.gui.add(script.mod_name, fluid_table, fluids, true)
+		state.visible = false
+		state.root.visible = false
+	end,
+	handlers = {
+		["selector"] = function (state, elem)
+			if state.selected == elem then return end
+
+			state.selected.toggled = false
+			elem.toggled = true
+			state.selected = elem
+		end
+	} --[[@as table<any, fun(state:WindowState.color_selector,elem:LuaGuiElement,event:GuiEventData)>]]
 } --[[@as newWindowParams]]
 
 return {}
