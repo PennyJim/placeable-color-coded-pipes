@@ -5,6 +5,7 @@ local lib = require("__placeable-color-coded-pipes__/library")
 ---@field visible boolean
 ---@field selected LuaGuiElement
 ---@field item string?
+---@field cur_item string?
 
 ---@param color string
 ---@return GuiElemModuleDef
@@ -112,15 +113,16 @@ gui.new{
 			if elem.name ~= "default_color"
 			and elem.name ~= "dynamic_toggle" then
 				local cursor_stack = state.player.cursor_stack
+				state.cur_item = elem.tags.color.."-"..state.item
 				if lib.valid_stack(cursor_stack) then
 					---@cast cursor_stack -?
 					cursor_stack.set_stack{
-						name = elem.tags.color.."-"..state.item,
+						name = state.cur_item,
 						count = cursor_stack.count,
 						health = cursor_stack.health
 					}
 				else
-					state.player.cursor_ghost = elem.tags.color.."-"..state.item
+					state.player.cursor_ghost = state.cur_item
 				end
 			end
 		end

@@ -15,6 +15,20 @@ events[defines.events.on_player_cursor_stack_changed] = function (event)
 
 	if not cursor_valid and not cursor_ghost then
 		if state.visible then
+			local inv = player.get_main_inventory()
+			if inv then -- FIXME: Doesn't clean items dropped or stashed into inventories
+				local old_item = inv.find_item_stack(state.cur_item)
+				if lib.valid_stack(old_item) then
+					---@cast old_item -?
+					old_item.set_stack{
+						name = state.item,
+						count = old_item.count,
+						health = old_item.health
+					}
+				end
+			end
+
+			state.cur_item = nil
 			state.item = nil
 			state.visible = false
 			state.root.visible = false
@@ -31,6 +45,7 @@ events[defines.events.on_player_cursor_stack_changed] = function (event)
 		name = lib.get_root_item(cursor_stack.name)
 	end
 
+	if state.item == name then return end
 	if not name then
 		-- Remove window
 		if state.visible then
@@ -41,7 +56,6 @@ events[defines.events.on_player_cursor_stack_changed] = function (event)
 		return
 	end
 
-	if state.item == name then return end
 	state.item = name
 
 	local selected = state.selected
@@ -54,6 +68,7 @@ events[defines.events.on_player_cursor_stack_changed] = function (event)
 	else
 		new_item = selected.tags.color.."-"..name
 	end
+	state.cur_item = new_item
 
 	if not cursor_valid then
 		player.cursor_ghost = new_item
