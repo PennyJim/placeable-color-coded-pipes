@@ -16,7 +16,7 @@ events[defines.events.on_built_entity] = function (event)
 	if not colorable_entities[name] then return end
 	if name == "entity-ghost" and not colorable_entities[entity.ghost_name] then return	end
 	---@type WindowState.color_selector
-	local state = global[script.mod_name][event.player_index]
+	local state = gui.get_state(script.mod_name, event.player_index) --[[@as WindowState.color_selector]]
 
 	local color_button = state.selected
 	if color_button.name == "default_color" then return end
@@ -69,7 +69,7 @@ end
 
 events[defines.events.on_player_cursor_stack_changed] = function (event)
 	---@type WindowState.color_selector
-	local state = global[script.mod_name][event.player_index]
+	local state = gui.get_state(script.mod_name, event.player_index) --[[@as WindowState.color_selector]]
 	local player = state.player
 	local cursor_stack = player.cursor_stack
 	local cursor_ghost = player.cursor_ghost --[[@as LuaItemPrototype]]
