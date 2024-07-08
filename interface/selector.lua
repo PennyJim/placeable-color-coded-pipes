@@ -1,4 +1,5 @@
 local gui = require("__gui-modules__.gui")
+local lib = require("__placeable-color-coded-pipes__/library")
 
 ---@class WindowState.color_selector : WindowState
 ---@field visible boolean
@@ -108,7 +109,20 @@ gui.new{
 			state.selected.toggled = false
 			elem.toggled = true
 			state.selected = elem
-			state.player.cursor_ghost = elem.tags.color.."-"..state.item
+			if elem.name ~= "default_color"
+			and elem.name ~= "dynamic_toggle" then
+				local cursor_stack = state.player.cursor_stack
+				if lib.valid_stack(cursor_stack) then
+					---@cast cursor_stack -?
+					cursor_stack.set_stack{
+						name = elem.tags.color.."-"..state.item,
+						count = cursor_stack.count,
+						health = cursor_stack.health
+					}
+				else
+					state.player.cursor_ghost = elem.tags.color.."-"..state.item
+				end
+			end
 		end
 	} --[[@as table<any, fun(state:WindowState.color_selector,elem:LuaGuiElement,event:GuiEventData)>]]
 } --[[@as newWindowParams]]
