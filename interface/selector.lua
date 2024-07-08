@@ -102,6 +102,7 @@ gui.new{
 		state.gui.add(script.mod_name, fluid_table, fluids, true)
 		state.visible = false
 		state.root.visible = false
+		state.elems.default.children[2].enabled = false
 	end,
 	handlers = {
 		["selector"] = function (state, elem)
@@ -112,18 +113,21 @@ gui.new{
 			state.selected = elem
 			if elem.name ~= "default_color"
 			and elem.name ~= "dynamic_toggle" then
-				local cursor_stack = state.player.cursor_stack
 				state.cur_item = elem.tags.color.."-"..state.item
-				if lib.valid_stack(cursor_stack) then
-					---@cast cursor_stack -?
-					cursor_stack.set_stack{
-						name = state.cur_item,
-						count = cursor_stack.count,
-						health = cursor_stack.health
-					}
-				else
-					state.player.cursor_ghost = state.cur_item
-				end
+			else
+				state.cur_item = state.item
+			end
+
+			local cursor_stack = state.player.cursor_stack
+			if lib.valid_stack(cursor_stack) then
+				---@cast cursor_stack -?
+				cursor_stack.set_stack{
+					name = state.cur_item,
+					count = cursor_stack.count,
+					health = cursor_stack.health
+				}
+			else
+				state.player.cursor_ghost = state.cur_item
 			end
 		end
 	} --[[@as table<any, fun(state:WindowState.color_selector,elem:LuaGuiElement,event:GuiEventData)>]]
