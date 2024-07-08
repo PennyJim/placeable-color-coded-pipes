@@ -25,6 +25,18 @@ events[defines.events.on_player_cursor_stack_changed] = function (event)
 						count = old_item.count,
 						health = old_item.health
 					}
+				else
+					local more_items = inv.find_item_stack(state.item)
+					if lib.valid_stack(more_items) then
+						---@cast more_items -?
+						if player.cursor_stack.set_stack{
+							name = state.cur_item,
+							count = more_items.count,
+							health = more_items.health
+						} then
+							more_items.clear()
+						end
+					end
 				end
 			end
 
