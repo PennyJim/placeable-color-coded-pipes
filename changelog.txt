@@ -1,4 +1,11 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.0.1
+Date: ????
+  Changes:
+    - Now replaces the item in your cursor rather than the entity after it was placed
+  Bugfixes:
+    - Due to the afformentioned change in replacement, underground dragging now works again
+---------------------------------------------------------------------------------------------------
 Version: 0.0.0
 Date: 2024-07-07
   Changes:
