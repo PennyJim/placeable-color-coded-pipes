@@ -14,7 +14,7 @@ local function create_button(color)
 		type="sprite-button",
 		style = "color_coded_button",
 		tags={color=color},
-		sprite = "item/"..color.."-pipe",
+		sprite = "item/"..color.."-color-coded-pipe",
 		handler = "selector"
 	}
 end
@@ -87,7 +87,7 @@ gui.new{
 		local fluids = {}
 
     for _, fluid in pairs(game.fluid_prototypes) do
-			local prototype_name = fluid.name .. "-pipe"
+			local prototype_name = fluid.name .. "-color-coded-pipe"
 			if game.entity_prototypes[prototype_name] then
 					table.insert(fluids, create_button(fluid.name))
 			end
@@ -113,7 +113,7 @@ gui.new{
 			state.selected = elem
 			if elem.name ~= "default_color"
 			and elem.name ~= "dynamic_toggle" then
-				state.cur_item = elem.tags.color.."-"..state.item
+				state.cur_item = elem.tags.color.."-color-coded-"..state.item
 			else
 				state.cur_item = state.item
 			end

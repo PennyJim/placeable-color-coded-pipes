@@ -78,7 +78,7 @@ events[defines.events.on_player_cursor_stack_changed] = function (event)
 	elseif selected.name == "dynamic_toggle" then
 		-- Choose the proper color somehow?
 	else
-		new_item = selected.tags.color.."-"..name
+		new_item = selected.tags.color.."-color-coded-"..name
 	end
 	state.cur_item = new_item
 
