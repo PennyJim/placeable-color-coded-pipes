@@ -55,5 +55,20 @@ function library.set_item_name(stack, new_name)
 		spoil_percent = stack.spoil_percent,
 	}
 end
+---@param player LuaPlayer
+---@param new_name string
+function library.set_cursor_name(player, new_name)
+	local cursor = player.cursor_stack
+	if library.valid_stack(cursor) then
+		---@cast cursor -?
+		library.set_item_name(cursor, new_name)
+	else
+		local ghost = player.cursor_ghost or {}
+		player.cursor_ghost = {
+			name = new_name,
+			quality = ghost.quality
+		}
+	end
+end
 
 return library

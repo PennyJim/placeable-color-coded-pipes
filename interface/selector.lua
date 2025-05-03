@@ -22,6 +22,28 @@ local function create_button(color)
 	}
 end
 
+---@param state WindowState.color_selector
+---@param elem LuaGuiElement
+local function set_color(state, elem)
+	if state.selected == elem then return end
+
+	-- Swap the element toggled
+	state.selected.toggled = false
+	elem.toggled = true
+	state.selected = elem
+
+	-- Update current item
+	if elem.name ~= "default_color"
+	and elem.name ~= "dynamic_toggle" then
+		state.cur_item = elem.tags.color.."-color-coded-"..state.item
+	else
+		state.cur_item = state.item
+	end
+
+	-- Update the cursor
+	lib.set_cursor_name(state.player, state.cur_item)
+end
+
 gui.new{
 	window_def = {
 		namespace = script.mod_name,
@@ -121,27 +143,7 @@ gui.new{
 		state.elems["dynamic_toggle"].enabled = false
 	end,
 	handlers = {
-		["selector"] = function (state, elem)
-			if state.selected == elem then return end
-
-			state.selected.toggled = false
-			elem.toggled = true
-			state.selected = elem
-			if elem.name ~= "default_color"
-			and elem.name ~= "dynamic_toggle" then
-				state.cur_item = elem.tags.color.."-color-coded-"..state.item
-			else
-				state.cur_item = state.item
-			end
-
-			local cursor_stack = state.player.cursor_stack
-			if lib.valid_stack(cursor_stack) then
-				---@cast cursor_stack -?
-				lib.set_item_name(cursor_stack, state.cur_item)
-			else
-				state.player.cursor_ghost = state.cur_item
-			end
-		end
+		["selector"] = set_color
 	} --[[@as table<any, fun(state:WindowState.color_selector,elem:LuaGuiElement,event:EventData.GuiEvents)>]]
 } --[[@as newWindowParams]]
 

@@ -110,15 +110,42 @@ local function color_cleared(state)
 	state.root.visible = false
 end
 
--- --MARK: Fast transfer
--- events[defines.events.on_player_fast_transferred] = function (event)
--- 	if not event.from_player then return end
+---@param state WindowState.color_selector
+---@param item string
+local function update_item(state, item)
+	state.item = item
+	Selector.update_sprites(state, item)
 
--- 	local state = gui.get_state(script.mod_name, event.player_index) --[[@as WindowState.color_selector]]
--- 	if not state.cur_item then return end
+	local selected = state.selected
+	---@type string
+	local new_item
+	if selected.name == "default_color" then
+		new_item = item
+	elseif selected.name == "dynamic_toggle" then
+		-- Choose the proper color somehow?
+	else
+		new_item = selected.tags.color.."-color-coded-"..item
+	end
 
--- 	clear_colored_from_entity(state, event.entity)
--- end
+	state.cur_item = new_item
+	lib.set_cursor_name(state.player, new_item)
+
+	if not state.visible then
+		-- Add window
+		state.visible = true
+		state.root.visible = true
+	end
+end
+
+--MARK: Fast transfer
+events[defines.events.on_player_fast_transferred] = function (event)
+	if not event.from_player then return end
+
+	local state = gui.get_state(script.mod_name, event.player_index) --[[@as WindowState.color_selector]]
+	if not state.cur_item then return end
+
+	clear_colored_from_entity(state, event.entity)
+end
 --MARK: Dropped item
 events[defines.events.on_player_dropped_item] = function (event)
 	local state = gui.get_state(script.mod_name, event.player_index) --[[@as WindowState.color_selector]]
@@ -161,46 +188,12 @@ events[defines.events.on_player_cursor_stack_changed] = function (event)
 		stack_name = cursor_stack.name
 	end
 
-	---@type string|false
 	local base_name = lib.get_root_item(stack_name)
+	-- Already was selected
 	if state.item == base_name then return end
-
-	-- Clear the inventory of the old item
-	-- For they might have just picked up a different one
-	if state.visible then
-		color_cleared(state)
-	end
-
 	-- Not an item we care to act on
 	if not base_name then return end
 
-	state.item = base_name
-	Selector.update_sprites(state, base_name)
-
-	local selected = state.selected
-	---@type string
-	local new_item
-	if selected.name == "default_color" then
-		new_item = base_name
-	elseif selected.name == "dynamic_toggle" then
-		-- Choose the proper color somehow?
-	else
-		new_item = selected.tags.color.."-color-coded-"..base_name
-	end
-	state.cur_item = new_item
-
-	if not cursor_valid then
-		player.cursor_ghost = new_item
-	else
-		---@cast cursor_stack -?
-		lib.set_item_name(cursor_stack, new_item)
-	end
-
-	if not state.visible then
-		-- Add window
-		state.visible = true
-		state.root.visible = true
-	end
-end
+	update_item(state, base_name)end
 
 return cursor_handler
