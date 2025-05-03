@@ -112,23 +112,28 @@ end
 
 ---@param state WindowState.color_selector
 ---@param item string
-local function update_item(state, item)
+---@param color? string
+local function update_item(state, item, color)
 	state.item = item
 	Selector.update_sprites(state, item)
 
-	local selected = state.selected
-	---@type string
-	local new_item
-	if selected.name == "default_color" then
-		new_item = item
-	elseif selected.name == "dynamic_toggle" then
-		-- Choose the proper color somehow?
+	if color then
+		Selector.select_color(state, color)
 	else
-		new_item = selected.tags.color.."-color-coded-"..item
-	end
+		local selected = state.selected
+		---@type string
+		local new_item
+		if selected.name == "default_color" then
+			new_item = item
+		elseif selected.name == "dynamic_toggle" then
+			-- Choose the proper color somehow?
+		else
+			new_item = selected.tags.color.."-color-coded-"..item
+		end
 
-	state.cur_item = new_item
-	lib.set_cursor_name(state.player, new_item)
+		state.cur_item = new_item
+		lib.set_cursor_name(state.player, new_item)
+	end
 
 	if not state.visible then
 		-- Add window
@@ -194,6 +199,18 @@ events[defines.events.on_player_cursor_stack_changed] = function (event)
 	-- Not an item we care to act on
 	if not base_name then return end
 
-	update_item(state, base_name)end
+	update_item(state, base_name)
+end
+
+events[defines.events.on_player_pipette] = function (event)
+	local state = gui.get_state(script.mod_name, event.player_index) --[[@as WindowState.color_selector]]
+	local selected = state.player.selected
+	if not selected then return log("How did the player pipette without selecting the entity??") end
+
+	local root, color = lib.get_root_item(selected.name)
+	if not root then return end
+
+	update_item(state, root, color)
+end
 
 return cursor_handler

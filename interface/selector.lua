@@ -13,6 +13,7 @@ local lib = require("__placeable-color-coded-pipes__/library")
 local function create_button(color)
 	return {
 		args = {
+			name = color,
 			type="sprite-button",
 			style = "color_coded_button",
 			tags={color=color},
@@ -166,6 +167,15 @@ function Selector.update_sprites(state, item)
 	for _, elem in pairs(elems.fluids.children) do
 		elem.sprite = "item/".. elem.tags.color .. "-color-coded-" .. item
 	end
+end
+
+---@param state WindowState.color_selector
+---@param color string
+function Selector.select_color(state, color)
+	local elem = state.elems[color]
+	if not elem then error("Invalid color: "..color) end
+
+	set_color(state, elem)
 end
 
 return Selector
