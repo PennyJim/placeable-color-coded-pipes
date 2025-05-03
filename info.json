@@ -9,5 +9,16 @@
 		"base >= 1.1",
 		"gui-modules = 0.0.6",
 		"color-coded-pipes >= 1.2.4"
-	]
+	],
+	"package": {
+		"ignore": [
+			"gallery/**"
+		],
+		"gallery": [
+			"gallery/Tanks.png"
+		],
+		"readme": "README.md",
+		"sync_portal_details": true,
+		"prune_gallery": true
+	}
 }
