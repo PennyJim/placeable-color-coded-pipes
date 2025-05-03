@@ -86,11 +86,7 @@ events[defines.events.on_player_cursor_stack_changed] = function (event)
 		player.cursor_ghost = new_item
 	else
 		---@cast cursor_stack -?
-		cursor_stack.set_stack{
-			name = new_item,
-			count = cursor_stack.count,
-			health = cursor_stack.health
-		}
+		lib.set_item_name(cursor_stack, new_item)
 	end
 
 	if not state.visible then

@@ -42,4 +42,15 @@ function library.valid_stack(stack)
 	return stack and stack.valid and stack.valid_for_read or false
 end
 
+---@param stack LuaItemStack
+function library.set_item_name(stack, new_name)
+	return stack.set_stack{
+		name = new_name,
+		count = stack.count,
+		health = stack.health,
+		quality = stack.quality,
+		spoil_percent = stack.spoil_percent,
+	}
+end
+
 return library

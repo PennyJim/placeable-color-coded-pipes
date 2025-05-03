@@ -137,11 +137,7 @@ gui.new{
 			local cursor_stack = state.player.cursor_stack
 			if lib.valid_stack(cursor_stack) then
 				---@cast cursor_stack -?
-				cursor_stack.set_stack{
-					name = state.cur_item,
-					count = cursor_stack.count,
-					health = cursor_stack.health
-				}
+				lib.set_item_name(cursor_stack, state.cur_item)
 			else
 				state.player.cursor_ghost = state.cur_item
 			end
