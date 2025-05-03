@@ -4,6 +4,7 @@ local lib = require("__placeable-color-coded-pipes__/library")
 ---@class WindowState.color_selector : modules.WindowState
 ---@field visible boolean
 ---@field selected LuaGuiElement
+---@field rendered_item string
 ---@field item string?
 ---@field cur_item string?
 
@@ -116,7 +117,8 @@ gui.new{
 		state.gui.add(script.mod_name, fluid_table, fluids)
 		state.visible = false
 		state.root.visible = false
-		state.elems.default.children[2].enabled = false
+		state.rendered_item = state.rendered_item or "pipe"
+		state.elems["dynamic_toggle"].enabled = false
 	end,
 	handlers = {
 		["selector"] = function (state, elem)
@@ -147,4 +149,25 @@ gui.new{
 	} --[[@as table<any, fun(state:WindowState.color_selector,elem:LuaGuiElement,event:EventData.GuiEvents)>]]
 } --[[@as newWindowParams]]
 
-return {}
+local Selector = {}
+
+---@param state WindowState.color_selector
+---@param item string
+function Selector.update_sprites(state, item)
+	if state.rendered_item == item then return end
+	state.rendered_item = item
+
+	local elems = state.elems
+
+	elems.default_color.sprite = "item/" .. item
+	elems.dynamic_toggle.sprite = "item/" .. item
+
+	for _, elem in pairs(elems.colors.children) do
+		elem.sprite = "item/".. elem.tags.color .. "-color-coded-" .. item
+	end
+	for _, elem in pairs(elems.fluids.children) do
+		elem.sprite = "item/".. elem.tags.color .. "-color-coded-" .. item
+	end
+end
+
+return Selector
