@@ -1,20 +1,22 @@
 local gui = require("__gui-modules__.gui")
 local lib = require("__placeable-color-coded-pipes__/library")
 
----@class WindowState.color_selector : WindowState
+---@class WindowState.color_selector : modules.WindowState
 ---@field visible boolean
 ---@field selected LuaGuiElement
 ---@field item string?
 ---@field cur_item string?
 
 ---@param color string
----@return GuiElemModuleDef
+---@return modules.GuiElemDef
 local function create_button(color)
 	return {
-		type="sprite-button",
-		style = "color_coded_button",
-		tags={color=color},
-		sprite = "item/"..color.."-color-coded-pipe",
+		args = {
+			type="sprite-button",
+			style = "color_coded_button",
+			tags={color=color},
+			sprite = "item/"..color.."-color-coded-pipe",
+		},
 		handler = "selector"
 	}
 end
@@ -25,34 +27,44 @@ gui.new{
 		root = "left",
 		version = 1,
 		definition = {
-			type = "frame", direction = "vertical",
-			caption = {"pipe-placer.title"},
+			args = {
+				type = "frame", direction = "vertical",
+				caption = {"pipe-placer.title"},
+			},
 			children = {
-				{type = "label", caption = {"pipe-placer.default"}},
+				{args = {type = "label", caption = {"pipe-placer.default"}}},
 				{
-					type = "table", name = "default",
-					column_count = 6, style = "color_coded_pipes_table",
+					args = {
+						type = "table", name = "default",
+						column_count = 6, style = "color_coded_pipes_table",
+					},
 					children = {
 						{
-							type="sprite-button",
-							name = "default_color",
-							style = "color_coded_button",
-							sprite="item/pipe",
+							args = {
+								type="sprite-button",
+								name = "default_color",
+								style = "color_coded_button",
+								sprite="item/pipe",
+							},
 							handler = "selector"
 						},
 						{
-							type="sprite-button",
-							name = "dynamic_toggle",
-							style = "color_coded_button",
-							sprite="item/pipe",
+							args = {
+								type="sprite-button",
+								name = "dynamic_toggle",
+								style = "color_coded_button",
+								sprite="item/pipe",
+							},
 							handler = "selector"
 						},
 					}
 				},
-				{type = "label", caption = {"pipe-placer.colors"}},
+				{args = {type = "label", caption = {"pipe-placer.colors"}}},
 				{
-					type = "table", name = "colors",
-					column_count = 6, style = "color_coded_pipes_table",
+					args = {
+						type = "table", name = "colors",
+						column_count = 6, style = "color_coded_pipes_table",
+					},
 					children = {
 						create_button("red"),
 						create_button("orange"),
@@ -65,10 +77,12 @@ gui.new{
 						create_button("white"),
 					}
 				},
-				{type = "label", caption = {"pipe-placer.fluids"}},
+				{args = {type = "label", caption = {"pipe-placer.fluids"}}},
 				{
-					type = "table", name = "fluids",
-					column_count = 6, style = "color_coded_pipes_table",
+					args = {
+						type = "table", name = "fluids",
+						column_count = 6, style = "color_coded_pipes_table",
+					},
 					children = {}
 				}
 			}
@@ -83,7 +97,7 @@ gui.new{
 		end
 
 		fluid_table.clear()
-		---@type GuiElemModuleDef[]
+		---@type modules.GuiElemDef[]
 		local fluids = {}
 
     for _, fluid in pairs(game.fluid_prototypes) do
@@ -99,7 +113,7 @@ gui.new{
 			state.selected = default_color
 		end
 
-		state.gui.add(script.mod_name, fluid_table, fluids, true)
+		state.gui.add(script.mod_name, fluid_table, fluids)
 		state.visible = false
 		state.root.visible = false
 		state.elems.default.children[2].enabled = false
@@ -130,7 +144,7 @@ gui.new{
 				state.player.cursor_ghost = state.cur_item
 			end
 		end
-	} --[[@as table<any, fun(state:WindowState.color_selector,elem:LuaGuiElement,event:GuiEventData)>]]
+	} --[[@as table<any, fun(state:WindowState.color_selector,elem:LuaGuiElement,event:EventData.GuiEvents)>]]
 } --[[@as newWindowParams]]
 
 return {}
