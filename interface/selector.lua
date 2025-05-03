@@ -176,11 +176,11 @@ function Selector.update_sprites(state, item)
 	elems.default_color.sprite = "item/" .. item
 	elems.dynamic_toggle.sprite = "item/" .. item
 
-	for _, elem in pairs(elems.colors.children) do
-		elem.sprite = "item/".. elem.tags.color .. "-color-coded-" .. item
-	end
-	for _, elem in pairs(elems.fluids.children) do
-		elem.sprite = "item/".. elem.tags.color .. "-color-coded-" .. item
+	for _, elem in pairs(elems) do
+		local tags = elem.tags
+		if tags.color then
+			elem.sprite = "item/".. tags.color .. "-color-coded-" .. item
+		end
 	end
 end
 
