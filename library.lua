@@ -7,33 +7,36 @@ local handled = {
 	"pump",
 	"storage-tank",
 }
+
 ---@type table<string,string>
-local matching_items = {}
-for _, key in pairs(handled) do
-	matching_items[key:gsub("-","%%-").."$"] = key
+local colored_items = {}
+---@type table<string,string>
+local root_items = {}
+for name, value in pairs(prototypes.get_item_filtered{
+	{filter = "place-result", elem_filters = {
+		{filter = "type", type = "pipe"},
+		{filter = "type", type = "pipe-to-ground"},
+		{filter = "type", type = "pump"},
+		{filter = "type", type = "storage-tank"},
+	}}
+}) do
+	local color, base_type = name:match("^(.+)%-color%-coded%-(.+)$")
+	if color then
+		colored_items[name] = color
+		root_items[name] = base_type
+	end
 end
 
----@type table<string,string|false>
-local root_items = {}
+for _, base_type in pairs(handled) do
+	colored_items[base_type] = "default_color"
+	root_items[base_type] = base_type
+end
+
 ---@param given_item string
----@return string|false
+---@return string root_item
+---@return string color
 function library.get_root_item(given_item)
-	-- Get cached
-	if root_items[given_item] ~= nil then
-		return root_items[given_item]
-	end
-
-	-- Process
-	for match, root_item in pairs(matching_items) do
-		if given_item:match(match) then
-			root_items[given_item] = root_item
-			return root_item
-		end
-	end
-
-	-- No item found
-	root_items[given_item] = false
-	return false
+	return root_items[given_item], colored_items[given_item]
 end
 
 ---@param stack LuaItemStack?
