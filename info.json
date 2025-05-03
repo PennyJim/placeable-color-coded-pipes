@@ -8,6 +8,6 @@
 	"dependencies": [
 		"base >= 1.1",
 		"gui-modules = 0.0.6",
-		"color-coded-pipes >= 0.0.6"
+		"color-coded-pipes >= 1.2.4"
 	]
 }
