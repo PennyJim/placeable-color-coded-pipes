@@ -117,22 +117,13 @@ local function update_item(state, item, color)
 	state.item = item
 	Selector.update_sprites(state, item)
 
+	local has_set = false
 	if color then
-		Selector.select_color(state, color)
-	else
-		local selected = state.selected
-		---@type string
-		local new_item
-		if selected.name == "default_color" then
-			new_item = item
-		elseif selected.name == "dynamic_toggle" then
-			-- Choose the proper color somehow?
-		else
-			new_item = selected.tags.color.."-color-coded-"..item
-		end
+		has_set = Selector.select_color(state, color)
+	end
 
-		state.cur_item = new_item
-		lib.set_cursor_name(state.player, new_item)
+	if not has_set then
+		Selector.set_item(state, item)
 	end
 
 	if not state.visible then

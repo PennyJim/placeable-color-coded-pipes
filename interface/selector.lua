@@ -24,25 +24,40 @@ local function create_button(color)
 end
 
 ---@param state WindowState.color_selector
+---@param base_item string
+function set_item(state, base_item)
+	local selected = state.selected
+	---@type string
+	local new_item
+	if selected.name == "default_color" then
+		new_item = base_item
+	elseif selected.name == "dynamic_toggle" then
+		-- Choose the proper color somehow?
+	else
+		new_item = selected.tags.color.."-color-coded-"..base_item
+	end
+
+	state.cur_item = new_item
+	lib.set_cursor_name(state.player, new_item)
+end
+
+---@param state WindowState.color_selector
 ---@param elem LuaGuiElement
+---@return boolean did_set
 local function set_color(state, elem)
-	if state.selected == elem then return end
+	if state.selected == elem then return false end
 
 	-- Swap the element toggled
 	state.selected.toggled = false
 	elem.toggled = true
 	state.selected = elem
 
-	-- Update current item
-	if elem.name ~= "default_color"
-	and elem.name ~= "dynamic_toggle" then
-		state.cur_item = elem.tags.color.."-color-coded-"..state.item
+	if state.item then
+		set_item(state, state.item)
+		return true
 	else
-		state.cur_item = state.item
+		return false
 	end
-
-	-- Update the cursor
-	lib.set_cursor_name(state.player, state.cur_item)
 end
 
 gui.new{
@@ -144,7 +159,7 @@ gui.new{
 		state.elems["dynamic_toggle"].enabled = false
 	end,
 	handlers = {
-		["selector"] = set_color
+		["selector"] = function(state, elem) set_color(state, elem) end -- To mask the returns
 	} --[[@as table<any, fun(state:WindowState.color_selector,elem:LuaGuiElement,event:EventData.GuiEvents)>]]
 } --[[@as newWindowParams]]
 
@@ -171,11 +186,14 @@ end
 
 ---@param state WindowState.color_selector
 ---@param color string
+---@return boolean did_set
 function Selector.select_color(state, color)
 	local elem = state.elems[color]
 	if not elem then error("Invalid color: "..color) end
 
-	set_color(state, elem)
+	return set_color(state, elem)
 end
+
+Selector.set_item = set_item
 
 return Selector
