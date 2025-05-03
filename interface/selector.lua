@@ -100,10 +100,10 @@ gui.new{
 		---@type modules.GuiElemDef[]
 		local fluids = {}
 
-    for _, fluid in pairs(game.fluid_prototypes) do
+    for _, fluid in pairs(prototypes.fluid) do
 			local prototype_name = fluid.name .. "-color-coded-pipe"
-			if game.entity_prototypes[prototype_name] then
-					table.insert(fluids, create_button(fluid.name))
+			if prototypes.entity[prototype_name] then
+				table.insert(fluids, create_button(fluid.name))
 			end
 		end
 
