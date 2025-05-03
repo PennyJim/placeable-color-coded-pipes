@@ -1,6 +1,6 @@
 ---@type event_handler
-local place_handler = {events = {}}
-local events = place_handler.events
+local cursor_handler = {events = {}}
+local events = cursor_handler.events
 local gui = require("__gui-modules__.gui")
 local lib = require("library")
 local Selector = require("interface.selector")
@@ -203,4 +203,4 @@ events[defines.events.on_player_cursor_stack_changed] = function (event)
 	end
 end
 
-return place_handler
+return cursor_handler
