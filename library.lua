@@ -8,6 +8,26 @@ local handled = {
 	"storage-tank",
 }
 
+--- Borrowed from Color Coded Pipes directly 1.3.0
+if script.active_mods["pipe_plus"] then
+	table.insert(handled, "pipe-to-ground-2")
+	table.insert(handled, "pipe-to-ground-3")
+end
+if script.active_mods["Flow Control"] then
+	table.insert(handled, "pipe-elbow")
+	table.insert(handled, "pipe-junction")
+	table.insert(handled, "pipe-straight")
+end
+if script.active_mods["StorageTank2_2_0"] then
+	table.insert(handled, "storage-tank2")
+end
+if script.active_mods["zithorian-extra-storage-tanks-port"] then
+	table.insert(handled, "fluid-tank-1x1")
+	table.insert(handled, "fluid-tank-2x2")
+	table.insert(handled, "fluid-tank-3x4")
+	table.insert(handled, "fluid-tank-5x5")
+end
+
 ---@type table<string,string>
 local colored_items = {}
 ---@type table<string,string>
