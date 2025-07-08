@@ -60,6 +60,12 @@ local function set_color(state, elem)
 	end
 end
 
+---@type modules.GuiElemDef[]
+local color_buttons = {}
+for index, color in pairs(lib.colors) do
+	color_buttons[index] = create_button(color)
+end
+
 gui.new{
 	window_def = {
 		namespace = script.mod_name,
@@ -104,17 +110,7 @@ gui.new{
 						type = "table", name = "colors",
 						column_count = 6, style = "color_coded_pipes_table",
 					},
-					children = {
-						create_button("red"),
-						create_button("orange"),
-						create_button("yellow"),
-						create_button("green"),
-						create_button("blue"),
-						create_button("purple"),
-						create_button("pink"),
-						create_button("black"),
-						create_button("white"),
-					}
+					children = color_buttons
 				},
 				{args = {type = "label", caption = {"pipe-placer.fluids"}}},
 				{
@@ -138,12 +134,8 @@ gui.new{
 		fluid_table.clear()
 		---@type modules.GuiElemDef[]
 		local fluids = {}
-
-    for _, fluid in pairs(prototypes.fluid) do
-			local prototype_name = fluid.name .. "-color-coded-pipe"
-			if prototypes.entity[prototype_name] then
-				table.insert(fluids, create_button(fluid.name))
-			end
+    for index, fluid in pairs(lib.fluids) do
+			fluids[index] = create_button(fluid)
 		end
 
 		if not state.selected or not state.selected.valid then
