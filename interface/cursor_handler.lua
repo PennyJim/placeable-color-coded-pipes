@@ -5,6 +5,7 @@ local gui = require("__gui-modules__.gui")
 local lib = require("library")
 local Selector = require("interface.selector")
 
+--MARK: Clearing
 ---@param state WindowState.color_selector
 ---@param inventory LuaInventory
 ---@return boolean did_clear
@@ -110,6 +111,7 @@ local function color_cleared(state)
 	state.root.visible = false
 end
 
+--MARK: Interface updation
 ---@param state WindowState.color_selector
 ---@param item string
 ---@param color? string
@@ -202,6 +204,41 @@ events[defines.events.on_player_pipette] = function (event)
 	if not root then return end
 
 	update_item(state, root, color)
+end
+
+---@param state WindowState.color_selector
+---@param change int
+local function cycle(state, change)
+	local name = state.selected.name
+
+	local index = lib.color_indexies[name]
+	local array = lib.colors
+	if not index then
+		index = lib.fluid_indexies[name]
+		array = lib.fluids
+	end
+	if not index then return end
+
+	local size = #array
+	index = (index + change) % size
+	if index == 0 then
+		index = size
+	end
+
+	Selector.select_color(state, array[index])
+end
+
+---@param event EventData.CustomInputEvent
+events[script.get_event_id("color-coded-linked-cycle-blueprint-forwards")] = function (event)
+	local state = gui.get_state(script.mod_name, event.player_index) --[[@as WindowState.color_selector]]
+	if not state.visible then return end
+	cycle(state, 1)
+end
+---@param event EventData.CustomInputEvent
+events[script.get_event_id("color-coded-linked-cycle-blueprint-backwards")] = function (event)
+	local state = gui.get_state(script.mod_name, event.player_index) --[[@as WindowState.color_selector]]
+	if not state.visible then return end
+	cycle(state, -1)
 end
 
 return cursor_handler
