@@ -117,7 +117,7 @@ end
 ---@param color? string
 local function update_item(state, item, color)
 	state.item = item
-	Selector.update_sprites(state, item)
+	Selector.update_items(state, item)
 
 	local has_set = false
 	if color then

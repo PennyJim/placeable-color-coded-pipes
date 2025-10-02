@@ -18,6 +18,7 @@ local function create_button(color)
 			style = "color_coded_button",
 			tags={color=color},
 			sprite = "item/"..color.."-color-coded-pipe",
+			elem_tooltip = {type = "item", name = color.."-color-coded-pipe"}
 		},
 		handler = "selector"
 	}
@@ -60,17 +61,12 @@ local function set_color(state, elem)
 	end
 end
 
----@type modules.GuiElemDef[]
-local color_buttons = {}
-for index, color in pairs(lib.colors) do
-	color_buttons[index] = create_button(color)
-end
 
 gui.new{
 	window_def = {
 		namespace = script.mod_name,
 		root = "left",
-		version = 1,
+		version = 2,
 		definition = {
 			args = {
 				type = "frame", direction = "vertical",
@@ -90,6 +86,7 @@ gui.new{
 								name = "default_color",
 								style = "color_coded_button",
 								sprite="item/pipe",
+								elem_tooltip = {type = "item", name = "pipe"}
 							},
 							handler = "selector"
 						},
@@ -110,7 +107,14 @@ gui.new{
 						type = "table", name = "colors",
 						column_count = 6, style = "color_coded_pipes_table",
 					},
-					children = color_buttons
+					children = (function()
+						---@type modules.GuiElemDef[]
+						local color_buttons = {}
+						for index, color in pairs(lib.colors) do
+							color_buttons[index] = create_button(color)
+						end
+						return color_buttons
+					end)()
 				},
 				{args = {type = "label", caption = {"pipe-placer.fluids"}}},
 				{
@@ -159,19 +163,24 @@ local Selector = {}
 
 ---@param state WindowState.color_selector
 ---@param item string
-function Selector.update_sprites(state, item)
+function Selector.update_items(state, item)
 	if state.rendered_item == item then return end
 	state.rendered_item = item
 
 	local elems = state.elems
 
 	elems.default_color.sprite = "item/" .. item
+	elems.default_color.elem_tooltip = {type = "item", name = item}
 	elems.dynamic_toggle.sprite = "item/" .. item
+	-- TODO: This should probably get a different element as the tooltip
+	-- elems.dynamic_toggle.elem_tooltip = {type = "item", name = item}
 
 	for _, elem in pairs(elems) do
 		local tags = elem.tags
 		if tags.color then
-			elem.sprite = "item/".. tags.color .. "-color-coded-" .. item
+			local colored_item = tags.color .. "-color-coded-" .. item
+			elem.sprite = "item/".. colored_item
+			elem.elem_tooltip = {type = "item", name = colored_item}
 		end
 	end
 end
