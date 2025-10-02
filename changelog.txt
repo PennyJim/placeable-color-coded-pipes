@@ -1,6 +1,6 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.0.3
-Date: ????
+Date: 2025-10-02
   Features:
     - Some compatibility with Automatic Underground Connectors on behalf of Color Coded Pipes
     - Fully support all of Color Coded Pipe's supported entities
