@@ -1,7 +1,14 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.0.3
 Date: ????
+  Features:
+    - Some compatibility with Automatic Underground Connectors on behalf of Color Coded Pipes
+    - Fully support all of Color Coded Pipe's supported entities
+    - Add cycling through the pipes like through a blueprint book
   Changes:
+    - Now actually has tooltips like it always should've
+  Bugfixes:
+    - Actually enforces the Color Coded Pipes settings that this mod expects
 ---------------------------------------------------------------------------------------------------
 Version: 0.0.2
 Date: 2025-05-03
