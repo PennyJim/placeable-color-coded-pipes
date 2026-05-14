@@ -1,6 +1,11 @@
 local ccp_constants = require("__color-coded-pipes__.scripts.constants")
 local library = {}
 
+local pipe_colors = ccp_constants.rgb_colors
+if settings.startup["color-coded-pipes-show-pride-recipes"].value then
+	pipe_colors = ccp_constants.pipe_colors
+end
+
 ---@generic A
 ---@generic B
 ---@param tab table<A,B>
@@ -54,7 +59,7 @@ for _, base in pairs(handled) do
 	root_items[base] = base
 	refill_items[base] = refill
 
-	for color in pairs(ccp_constants.pipe_colors) do
+	for color in pairs(pipe_colors) do
 		local colored_base, refill = naming_pattern[base](color, base)
 		colored_items[colored_base] = color
 		root_items[colored_base] = base
@@ -73,7 +78,7 @@ local base_color_order = ccp_constants.color_order
 local fluid_colors, fluid_index = {}, 0
 ---@type table<string,string>
 local fluid_color_order = {}
-for color in pairs(ccp_constants.pipe_colors) do
+for color in pairs(pipe_colors) do
 	if not base_color_order[color] then
 		fluid_index = fluid_index + 1
 		fluid_colors[fluid_index] = color
