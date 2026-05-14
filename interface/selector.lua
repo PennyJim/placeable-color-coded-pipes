@@ -35,7 +35,7 @@ function set_item(state, base_item)
 	elseif selected.name == "dynamic_toggle" then
 		-- Choose the proper color somehow?
 	else
-		new_item = selected.tags.color.."-color-coded-"..base_item
+		new_item = lib.get_colored_item(base_item, selected.tags.color--[[@as string]])
 	end
 
 	state.cur_item = new_item
@@ -178,7 +178,7 @@ function Selector.update_items(state, item)
 	for _, elem in pairs(elems) do
 		local tags = elem.tags
 		if tags.color then
-			local colored_item = tags.color .. "-color-coded-" .. item
+			local colored_item = lib.get_colored_item(item, tags.color)
 			elem.sprite = "item/".. colored_item
 			elem.elem_tooltip = {type = "item", name = colored_item}
 		end

@@ -15,10 +15,27 @@ function library.invert_table(tab)
 	return inverted
 end
 
+local function default_naming_pattern(color, base)
+	return color.."-color-coded-"..base, base
+end
+
 ---@type string[]
 local handled = {}
+---A mapping from root item, into a function that'll convert the color and item into a colored item and refill item
+---@type table<string,fun(color:string,base:string):string,string>
+local naming_pattern = {}
+
 for index, entity in pairs(ccp_constants.base_entities) do
 	handled[index] = entity.name
+	naming_pattern[entity.name] = default_naming_pattern
+end
+
+
+if script.active_mods["the-one-mod-with-underground-bits"] then
+	handled[#handled+1] = "tomwub-pipe"
+	naming_pattern["tomwub-pipe"] = function (color, _)
+		return "tomwub-"..color.."-color-coded-pipe", "pipe"
+	end
 end
 
 ---A mapping from colored item to color
@@ -27,15 +44,21 @@ local colored_items = {}
 ---A mapping from colored item to item
 ---@type table<string,string>
 local root_items = {}
+---A mapping from colored item to refill item
+---@type table<string,string>
+local refill_items = {}
 
 for _, base in pairs(handled) do
+	local _, refill = naming_pattern[base]("", base)
 	colored_items[base] = "default_color"
 	root_items[base] = base
+	refill_items[base] = refill
 
 	for color in pairs(ccp_constants.pipe_colors) do
-		local colored_base = color.."-color-coded-"..base
+		local colored_base, refill = naming_pattern[base](color, base)
 		colored_items[colored_base] = color
 		root_items[colored_base] = base
+		refill_items[colored_base] = refill
 
 		if not prototypes.item[colored_base] then
 			log(colored_base.." doesn't exist despite Color Coded Pipes implying it should")
@@ -83,6 +106,20 @@ library.fluid_indexies = library.invert_table(fluid_colors)--[[@as table<string,
 ---@return string color
 function library.get_root_item(given_item)
 	return root_items[given_item], colored_items[given_item]
+end
+
+---@param colored_item string
+---@return string refill_item
+function library.get_refill_item(colored_item)
+	return refill_items[colored_item]
+end
+
+---@param root_item string
+---@param color string
+---@return string colored_item
+---@return string refill_item
+function library.get_colored_item(root_item, color)
+	return naming_pattern[root_item](color, root_item)
 end
 
 ---@param stack LuaItemStack?
