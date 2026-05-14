@@ -5,108 +5,53 @@ local gui = require("__gui-modules__.gui")
 local lib = require("library")
 local Selector = require("interface.selector")
 
---MARK: Clearing
 ---@param state WindowState.color_selector
----@param inventory LuaInventory
----@return boolean did_clear
-local function clear_colored_from_inventory(state, inventory)
-	-- Fetch the stack of the cleared item
-	local old_item = inventory.find_item_stack(state.cur_item)
-	-- Check if it exists
-	if not lib.valid_stack(old_item) then return false end
+local function restore_cursor_items(state)
+	local player = state.player
+	local cursor_stack = player.cursor_stack
+	if not cursor_stack then return end
+	local cursor_valid = lib.valid_stack(cursor_stack)
+	local inv = player.get_main_inventory()
+	---@cast inv -?
 
-	-- Uncolor it if it does
-	---@cast old_item -?
-	lib.set_item_name(old_item, state.item)
+	local inserted = inv.insert{
+		name = lib.get_refill_item(state.cur_item),
+		count = state.item_count,
+		quality = state.quality,
+	}
 
-	return true
-end
+	-- Something obstructing the cursor. Put it back
+	-- Also borrowed from Actual Underground Pipes (tomwub)
+	if inserted ~= state.item_count then
+		state.item_count = state.item_count - inserted
 
-local transport = {
-	["transport-belt"] = true,
-	["underground-belt"] = true,
-	["splitter"] = true,
-	["loader"] = true,
-	["loader-1x1"] = true,
-	["linked-belt"] = true,
-	["lane-splitter"] = true,
-}
-
----@param state WindowState.color_selector
----@param entity LuaEntity|LuaPlayer
-local function clear_colored_from_entity(state, entity)
-	local entity_type = entity.object_name == "LuaEntity" and entity.type or false
-
-	if transport[entity_type] then
-		-- Process a transport belt
-		for i = 1, entity.get_max_transport_line_index() do
-			local line = entity.get_transport_line(i)
-			if line and line.get_item_count(state.cur_item) > 0 then
-				for i = 1, #line do
-					local stack = line[i]
-					if stack.name == state.cur_item then
-						lib.set_item_name(line[i], state.item)
-					end
-				end
-			end
+		-- Done conditionally so it doesn't notify the player for no reason
+		if cursor_valid and player.can_insert{
+			name = cursor_stack.name,
+			count = cursor_stack.count,
+			quality = cursor_stack.quality,
+		} then
+			player.clear_cursor()
 		end
 
-
-	else
-		-- Process the inventories
-		for i = 1, entity.get_max_inventory_index() do
-			---@diagnostic disable-next-line: param-type-mismatch
-			local inventory = entity.get_inventory(i)
-			if inventory then
-				clear_colored_from_inventory(state, inventory)
-			end
-		end
+		cursor_stack.set_stack{
+			name = state.cur_item,
+			count = state.item_count,
+			quality = state.quality,
+		}
 	end
-end
-
----@param state WindowState.color_selector
----@param player LuaPlayer
-local function clear_player_colored(state, player)
-	local selected = player.selected
-	if not selected then goto notselected end
-	-- We must have just placed it
-	if selected.name == state.cur_item then goto notselected end -- Make this a return for that reason?
-	clear_colored_from_entity(state, selected)
-
-	::notselected::
-
-	local opened = player.opened
-	if not opened then goto notopened end
-	if type(opened) ~= "userdata" then goto notopened end
-	if opened.object_name ~= "LuaEntity" then goto notopened end
-	clear_colored_from_entity(state, opened)
-
-	::notopened::
-
-	clear_colored_from_entity(state, player)
 end
 
 ---@param state WindowState.color_selector
 local function color_cleared(state)
-	local player = state.player
-	local inv = player.get_main_inventory()
-
-	if inv and not clear_colored_from_inventory(state, inv) then
-
-		-- Didn't clear from inventory, restock the cursor.
-		local more_items = inv.find_item_stack(state.item)
-		if lib.valid_stack(more_items) then
-			---@cast more_items -?
-			if player.cursor_stack.transfer_stack(more_items) then
-				lib.set_item_name(player.cursor_stack, state.cur_item)
-			end
-		end
+	if state.item_count > 0 and state.need_restoration then
+		restore_cursor_items(state)
 	end
-
-	clear_player_colored(state, player)
-
 	state.cur_item = nil
+	state.quality = nil
 	state.item = nil
+	state.item_count = nil
+	state.need_restoration = nil
 	state.visible = false
 	state.root.visible = false
 end
@@ -115,8 +60,9 @@ end
 ---@param state WindowState.color_selector
 ---@param item string
 ---@param color? string
-local function update_item(state, item, color)
+local function update_item(state, item, quality, color)
 	state.item = item
+	state.quality = quality
 	Selector.update_items(state, item)
 
 	local has_set = false
@@ -135,24 +81,29 @@ local function update_item(state, item, color)
 	end
 end
 
---MARK: Fast transfer
-events[defines.events.on_player_fast_transferred] = function (event)
-	if not event.from_player then return end
+---@param state WindowState.color_selector
+local function refill_cursor(state)
+	local player = state.player
+	local inv = player.get_main_inventory()
+	---@cast inv -?
 
-	local state = gui.get_state(script.mod_name, event.player_index) --[[@as WindowState.color_selector]]
-	if not state.cur_item then return end
+	local refill_item = lib.get_refill_item(state.cur_item)
+	local stack, stack_index = inv.find_item_stack{
+		name = refill_item,
+		quality = player.cursor_ghost.quality,
+	}
+	if not stack then
+		state.item_count = 0
+		return
+	end ---@cast stack_index -?
 
-	clear_colored_from_entity(state, event.entity)
-end
---MARK: Dropped item
-events[defines.events.on_player_dropped_item] = function (event)
-	local state = gui.get_state(script.mod_name, event.player_index) --[[@as WindowState.color_selector]]
-	if not state.cur_item then return end
-
-	local stack = event.entity.stack
-	if stack.name == state.cur_item then
-		lib.set_item_name(stack, state.item)
-	end
+	lib.set_item_name(stack, state.cur_item)
+	state.item_count = stack.count
+	player.cursor_stack.transfer_stack(stack)
+	player.hand_location = {
+		inventory = inv.index,
+		slot = stack_index,
+	}
 end
 
 --MARK: Cursor changed
@@ -162,7 +113,7 @@ events[defines.events.on_player_cursor_stack_changed] = function (event)
 	local player = state.player
 
 	local cursor_stack = player.cursor_stack
-	local cursor_ghost = player.cursor_ghost --[[@as LuaItemPrototype]]
+	local cursor_ghost = player.cursor_ghost --[[@as ItemIDAndQualityIDPair]]
 	local cursor_valid = lib.valid_stack(cursor_stack)
 
 	if not cursor_valid and not cursor_ghost then
@@ -172,27 +123,45 @@ events[defines.events.on_player_cursor_stack_changed] = function (event)
 		return
 	end
 
-	-- MARK: Remove item transfers
-	if state.cur_item then
-		clear_player_colored(state, player)
-	end
-
 	---@type string
 	local stack_name
+	---@type QualityID
+	local stack_quality
 	if not cursor_valid then
 		stack_name = cursor_ghost.name--[[@as LuaItemPrototype]].name
+		stack_quality = cursor_ghost.quality
 	else
 		---@cast cursor_stack -?
 		stack_name = cursor_stack.name
+		stack_quality = cursor_stack.quality
 	end
 
 	local base_name = lib.get_root_item(stack_name)
-	-- Already was selected
-	if state.item == base_name then return end
 	-- Not an item we care to act on
 	if not base_name then return end
 
-	update_item(state, base_name)
+	---FIXME: Misses player's swapping the item in their hand for another
+	if state.item_count == -1 then
+		refill_cursor(state)
+		return
+	elseif cursor_valid then
+		---@cast cursor_stack -?
+		state.item_count = cursor_stack.count
+		state.need_restoration = cursor_stack.prototype.flags["only-in-cursor"]
+	else
+		state.item_count = 0
+		state.need_restoration = nil
+	end
+
+	-- Already was selected
+	if state.cur_item == stack_name then return end
+	-- if state.item ~= base_name then
+	-- 	update_item(state, base_name, stack_quality)
+	-- else
+
+	-- end
+
+	update_item(state, base_name, stack_quality)
 end
 
 events[defines.events.on_player_pipette] = function (event)
@@ -203,7 +172,20 @@ events[defines.events.on_player_pipette] = function (event)
 	local root, color = lib.get_root_item(selected.name)
 	if not root then return end
 
-	update_item(state, root, color)
+	update_item(state, root, selected.quality, color)
+end
+
+events[defines.events.on_built_entity] = function (event)
+	---@type WindowState.color_selector
+	local state = gui.get_state(script.mod_name, event.player_index) --[[@as WindowState.color_selector]]
+	if not state.visible then return end
+	if not state.player.is_cursor_empty() then return end
+
+	state.player.cursor_ghost = {
+		name = state.cur_item,
+		quality = event.entity.quality
+	}
+	state.item_count = -1
 end
 
 ---@param state WindowState.color_selector

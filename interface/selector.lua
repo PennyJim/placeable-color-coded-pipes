@@ -6,7 +6,10 @@ local lib = require("__placeable-color-coded-pipes__/library")
 ---@field selected LuaGuiElement
 ---@field rendered_item string
 ---@field item string?
+---@field quality QualityID?
 ---@field cur_item string?
+---@field item_count uint?
+---@field need_restoration true?
 
 ---@param color string
 ---@return modules.GuiElemDef
@@ -40,6 +43,13 @@ function set_item(state, base_item)
 
 	state.cur_item = new_item
 	lib.set_cursor_name(state.player, new_item)
+	if state.player.cursor_ghost then return end
+	local inv = state.player.get_main_inventory()
+	if not inv then return end
+	state.player.hand_location = {
+		inventory = inv.index,
+		slot = select(2, inv.find_empty_stack(lib.get_refill_item(new_item))),
+	}
 end
 
 ---@param state WindowState.color_selector
