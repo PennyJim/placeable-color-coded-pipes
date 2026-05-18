@@ -7,6 +7,9 @@ local Selector = require("interface.selector")
 
 ---@param state WindowState.color_selector
 local function restore_cursor_items(state)
+	if not state.need_restoration then return end
+	if state.item_count <= 0 then return end
+
 	local player = state.player
 	local cursor_stack = player.cursor_stack
 	if not cursor_stack then return end
@@ -44,9 +47,7 @@ end
 
 ---@param state WindowState.color_selector
 local function color_cleared(state)
-	if state.item_count > 0 and state.need_restoration then
-		restore_cursor_items(state)
-	end
+	restore_cursor_items(state)
 	state.cur_item = nil
 	state.quality = nil
 	state.item = nil
@@ -140,26 +141,41 @@ events[defines.events.on_player_cursor_stack_changed] = function (event)
 	-- Not an item we care to act on
 	if not base_name then return end
 
-	---FIXME: Misses player's swapping the item in their hand for another
+	---@type uint
+	local item_count
+	---@type true?
+	local need_restoration
 	if state.item_count == -1 then
 		refill_cursor(state)
 		return
 	elseif cursor_valid then
 		---@cast cursor_stack -?
-		state.item_count = cursor_stack.count
-		state.need_restoration = cursor_stack.prototype.flags["only-in-cursor"]
+		item_count = cursor_stack.count
+		need_restoration = cursor_stack.prototype.flags["only-in-cursor"]
 	else
-		state.item_count = 0
-		state.need_restoration = nil
+		item_count = 0
 	end
 
 	-- Already was selected
-	if state.cur_item == stack_name then return end
-	-- if state.item ~= base_name then
-	-- 	update_item(state, base_name, stack_quality)
-	-- else
+	if state.cur_item == stack_name then
+		if state.quality ~= stack_quality then
+			restore_cursor_items(state)
+			state.quality = stack_quality
+		end
+		state.item_count = item_count
+		state.need_restoration = need_restoration
+		return
+	end
 
-	-- end
+	---HACK: hard-coded fix for Actual Underground Pipes
+	if state.cur_item and not ({
+		["tomwub-"..stack_name] = true,
+		[stack_name:sub(8)] = true,
+	})[state.cur_item] then
+		restore_cursor_items(state)
+	end
+	state.item_count = item_count
+	state.need_restoration = need_restoration
 
 	update_item(state, base_name, stack_quality)
 end

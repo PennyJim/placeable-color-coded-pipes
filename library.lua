@@ -1,9 +1,14 @@
 local ccp_constants = require("__color-coded-pipes__.scripts.constants")
 local library = {}
 
+---@type table<string,Color>
 local pipe_colors = ccp_constants.rgb_colors
 if settings.startup["color-coded-pipes-show-pride-recipes"].value then
 	pipe_colors = ccp_constants.pipe_colors
+else
+	for fluid_color in pairs(ccp_constants.fluid_to_color_map--[[@as table<string,string>]]) do
+		pipe_colors[fluid_color] = ccp_constants.pipe_colors[fluid_color]
+	end
 end
 
 ---@generic A
