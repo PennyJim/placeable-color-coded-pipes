@@ -10,7 +10,7 @@
 		"gui-modules = 0.0.6",
 		"color-coded-pipes >= 1.4.4",
 		"? automatic-underground-pipe-connectors >= 2.0.4",
-		"? Actual Underground Pipes >= 1.1.3"
+		"? the-one-mod-with-underground-bits >= 1.1.3"
 	],
 	"package": {
 		"ignore": [
