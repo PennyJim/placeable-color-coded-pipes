@@ -6,6 +6,7 @@ Date: ????
   Bugfixes:
     - Fixed incompatibility with Actual Underground Pipes
     - Fixed pride pipes showing up when not enabled
+    - Removed invalid elements from `elems` after updating the gui
 ---------------------------------------------------------------------------------------------------
 Version: 0.0.3
 Date: 2025-10-02

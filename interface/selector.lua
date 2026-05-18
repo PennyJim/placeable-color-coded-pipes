@@ -142,16 +142,36 @@ gui.new{
 	---@param state WindowState.color_selector
 	state_setup = function (state)
 		local fluid_table = state.elems.fluids
-		if not fluid_table.valid then
-			error("Elems in global have become invalid somehow")
+		local color_table = state.elems.colors
+		if not fluid_table.valid or not color_table.valid then
+			error("Elem tables in storage have become invalid somehow")
 			return
 		end
 
+		-- Update Fluid table
 		fluid_table.clear()
 		---@type modules.GuiElemDef[]
 		local fluids = {}
     for index, fluid in pairs(lib.fluids) do
 			fluids[index] = create_button(fluid)
+		end
+		state.gui.add(script.mod_name, fluid_table, fluids)
+
+		-- Update Colors table
+		--FIXME: Only need to do this when the setting changes. GUI Modules doesn't pass config changed data
+		color_table.clear()
+		---@type modules.GuiElemDef[]
+		local colors = {}
+		for index, color in pairs(lib.colors) do
+			colors[index] = create_button(color)
+		end
+		state.gui.add(script.mod_name, color_table, colors)
+
+		-- Clean `elems` of removed elements
+		for name, element in pairs(state.elems) do
+			if not element.valid then
+				state.elems[name] = nil
+			end
 		end
 
 		if not state.selected or not state.selected.valid then
@@ -160,10 +180,10 @@ gui.new{
 			state.selected = default_color
 		end
 
-		state.gui.add(script.mod_name, fluid_table, fluids)
 		state.visible = false
 		state.root.visible = false
 		state.rendered_item = state.rendered_item or "pipe"
+		--TODO: Actually implement Dynamic toggle if I'm going to have a button for it :(
 		state.elems["dynamic_toggle"].enabled = false
 	end,
 	handlers = {
