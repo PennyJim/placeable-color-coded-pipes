@@ -109,6 +109,8 @@ gui.new{
 							},
 							handler = "selector"
 						},
+						--TODO: Add ones for cycling through pride flags
+						--TODO: Add one for cycling through colors in general
 					}
 				},
 				{args = {type = "label", caption = {"pipe-placer.colors"}}},

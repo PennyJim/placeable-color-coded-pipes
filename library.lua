@@ -3,7 +3,7 @@ local library = {}
 
 ---@type table<string,Color>
 local pipe_colors = ccp_constants.rgb_colors
-if settings.startup["color-coded-pipes-show-pride-recipes"].value then
+if settings.startup["placeable-color-coded-pipes-show-pride-pipes"].value then
 	pipe_colors = ccp_constants.pipe_colors
 else
 	for fluid_color in pairs(ccp_constants.fluid_to_color_map--[[@as table<string,string>]]) do
