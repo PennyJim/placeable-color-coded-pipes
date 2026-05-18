@@ -2,6 +2,10 @@
 Version: 0.0.4
 Date: ????
   Changes:
+    - Changed how item replacing is done to match Actual Underground Pipes
+  Bugfixes:
+    - Fixed incompatibility with Actual Underground Pipes
+    - Fixed pride pipes showing up when not enabled
 ---------------------------------------------------------------------------------------------------
 Version: 0.0.3
 Date: 2025-10-02
