@@ -180,6 +180,8 @@ events[defines.events.on_player_cursor_stack_changed] = function (event)
 	update_item(state, base_name, stack_quality)
 end
 
+---MARK: Accessory Events
+
 events[defines.events.on_player_pipette] = function (event)
 	local state = gui.get_state(script.mod_name, event.player_index) --[[@as WindowState.color_selector]]
 	local selected = state.player.selected
@@ -195,14 +197,21 @@ events[defines.events.on_built_entity] = function (event)
 	---@type WindowState.color_selector
 	local state = gui.get_state(script.mod_name, event.player_index) --[[@as WindowState.color_selector]]
 	if not state.visible then return end
-	if not state.player.is_cursor_empty() then return end
+	if not state.item_count or state.item_count == 0 then return end -- Might be able to rely on count existing if its visible
+	local player = state.player
 
-	state.player.cursor_ghost = {
-		name = state.cur_item,
-		quality = event.entity.quality
-	}
-	state.item_count = -1
+	if player.is_cursor_empty() then
+		player.cursor_ghost = {
+			name = state.cur_item,
+			quality = event.entity.quality
+		}
+		state.item_count = -1
+	elseif player.cursor_ghost and player.cursor_ghost.name.name == state.cur_item then
+		state.item_count = -1
+	end
 end
+
+---MARK: Cycling
 
 ---@param state WindowState.color_selector
 ---@param change int
