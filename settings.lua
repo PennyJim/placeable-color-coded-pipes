@@ -1,4 +1,4 @@
----@type table<string, data.ModBoolSettingPrototype>
+---@type {[string]: data.ModBoolSettingPrototype}
 local bool_settings = data.raw["bool-setting"]
 
 for _, name in pairs{

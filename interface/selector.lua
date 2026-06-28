@@ -1,15 +1,19 @@
 local gui = require("__gui-modules__.gui")
-local lib = require("__placeable-color-coded-pipes__/library")
+local lib = require("library")
 
----@class WindowState.color_selector : modules.WindowState
+---@class WindowState.color_selector.base : modules.WindowState
 ---@field visible boolean
 ---@field selected LuaGuiElement
 ---@field rendered_item string
----@field item string?
----@field quality QualityID?
----@field cur_item string?
----@field item_count uint?
----@field need_restoration true?
+
+---@class WindowState.color_selector.item : WindowState.color_selector.base
+---@field item string
+---@field quality data.QualityID
+---@field cur_item string
+---@field item_count uint
+---@field need_restoration true
+
+---@alias WindowState.color_selector WindowState.color_selector.base|WindowState.color_selector.item
 
 ---@param color string
 ---@return modules.GuiElemDef
@@ -45,10 +49,12 @@ function set_item(state, base_item)
 	lib.set_cursor_name(state.player, new_item)
 	if state.player.cursor_ghost then return end
 	local inv = state.player.get_main_inventory()
-	if not inv then return end
+	if not inv then return end--[[@cast inv.index -?]]
+	local slot = select(2, inv.find_empty_stack(lib.get_refill_item(new_item)))
+	---@cast slot -?
 	state.player.hand_location = {
 		inventory = inv.index,
-		slot = select(2, inv.find_empty_stack(lib.get_refill_item(new_item))),
+		slot = slot,
 	}
 end
 
@@ -209,7 +215,7 @@ function Selector.update_items(state, item)
 
 	for _, elem in pairs(elems) do
 		local tags = elem.tags
-		if tags.color then
+		if tags.color then--[[@cast tags.color string]]
 			local colored_item = lib.get_colored_item(item, tags.color)
 			elem.sprite = "item/".. colored_item
 			elem.elem_tooltip = {type = "item", name = colored_item}

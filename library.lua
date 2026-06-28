@@ -139,14 +139,29 @@ function library.valid_stack(stack)
 end
 
 ---@param stack LuaItemStack
+---@param new_name string
 function library.set_item_name(stack, new_name)
-	return stack.set_stack{
+	---@type ItemStackDefinition
+	local new_stack = {
 		name = new_name,
 		count = stack.count,
 		health = stack.health,
-		quality = stack.quality,
+		quality = stack.quality.name,
 		spoil_percent = stack.spoil_percent,
 	}
+
+	if stack.is_tool then
+		new_stack.durability = stack.durability
+	end
+	if stack.is_ammo then
+		new_stack.ammo = stack.ammo
+	end
+	if stack.is_item_with_tags then
+		new_stack.tags = stack.tags
+		new_stack.custom_description = stack.custom_description
+	end
+
+	return stack.set_stack(new_stack)
 end
 ---@param player LuaPlayer
 ---@param new_name string
